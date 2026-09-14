@@ -56,4 +56,7 @@ jobs:
 
       # Step 8: Run Docker container
       - name: Run Docker container
-        run: docker run -d -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/java-app:latest
+        env:
+           DOCKER_USER: ${{ secrets.DOCKER_USERNAME }}
+        run: |
+          docker run -d -p 8080:8080 $DOCKER_USER/java-app:latest
