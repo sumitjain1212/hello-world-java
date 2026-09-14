@@ -1,4 +1,3 @@
-```yaml
 name: Workflow to build and Review the code using SonarCloud
 
 on:
@@ -103,4 +102,3 @@ jobs:
         with:
           name: java-artifacts
           path: target/*.war
-```
