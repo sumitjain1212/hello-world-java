@@ -1,4 +1,5 @@
-name: Workflow to build and Review the code using Sonarqube
+```yaml
+name: Workflow to build and Review the code using SonarCloud
 
 on:
   workflow_dispatch:
@@ -7,6 +8,7 @@ on:
         description: 'Run the maven job'
         required: true
         type: boolean
+
       job_sonar:
         description: 'Run the sonar job'
         required: true
@@ -29,7 +31,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Build the code using maven
+      - name: Build the code using Maven
         run: mvn clean install
 
 
@@ -48,32 +50,45 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Code Coverage using SonarCloud
+      - name: Build and test using Maven
+        run: mvn -B clean verify
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@v7
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          mvn -B verify \
-            org.sonarsource.scanner.maven:sonar-maven-plugin:5.2.0.4988:sonar \
-            -Dsonar.projectKey=sumitorganization-121286_sumitjain1212 \
-            -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.organization=sumitorganization-121286 \
-            -Dsonar.token=$SONAR_TOKEN
+          SONAR_HOST_URL: https://sonarcloud.io
+        with:
+          args: >
+            -Dsonar.projectKey=sumitorganization-121286_sumitjain1212
+            -Dsonar.organization=sumitorganization-121286
 
-      - name: Check SonarQube report
+      - name: Check SonarCloud report
         run: |
           echo "Checking .scannerwork..."
-          ls -la
-          ls -la .scannerwork || true
 
-          if [ -f .scannerwork/report-task.txt ]; then
+          ls -la
+
+          if [ -d ".scannerwork" ]; then
+            echo ".scannerwork directory found:"
+            ls -la .scannerwork
+          else
+            echo "ERROR: .scannerwork directory does not exist"
+            exit 1
+          fi
+
+          if [ -f ".scannerwork/report-task.txt" ]; then
+            echo ""
             echo "report-task.txt found:"
+            echo "----------------------------------------"
             cat .scannerwork/report-task.txt
+            echo "----------------------------------------"
           else
             echo "ERROR: .scannerwork/report-task.txt does not exist"
             exit 1
           fi
 
-      - name: SonarQube Quality Gate check
+      - name: SonarCloud Quality Gate
         id: sonarqube-quality-gate-check
         uses: SonarSource/sonarqube-quality-gate-action@v1.2.1
         with:
@@ -88,3 +103,4 @@ jobs:
         with:
           name: java-artifacts
           path: target/*.war
+```
