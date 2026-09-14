@@ -1,0 +1,45 @@
+name: Workflow to build and Review the code using Sonarqube
+on:  
+ workflow_dispatch:  # this will allow us to run the workflow manually from the github repo
+   inputs:
+      job_maven:
+        description: 'Run the maven job'  # this is the description of the input parameter
+        required: true  # this will make the input parameter mandatory
+        type: boolean  # this will make the input parameter a boolean value
+      job_sonar:
+        description: 'Run the sonar job'  # this is the description of the input parameter
+        required: true  # this will make the input parameter mandatory
+        type: boolean  # this will make the input parameter a boolean value
+      
+jobs:
+  job_maven: 
+    if: ${{ inputs.job_maven }}  # this will check if the input parameter is job_maven or not
+    continue-on-error: true # if the job fails, the next job will still run
+    runs-on: ubuntu-latest 
+    steps:
+    - name: Checkout the code on runner VM
+      uses: actions/checkout@v7 
+    - name: Set up Java
+      uses: actions/setup-java@v6
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    - name: Build the code using maven 
+      run: mvn clean install       
+  job_sonar:
+    if: ${{ inputs.job_sonar }}  # this will check if the input parameter is job_sonar or not
+    needs: job_maven # this job_sonar job will run after the successful completion of job_maven
+    runs-on: ubuntu-latest 
+    steps:
+    - name: Checkout the code on runner VM
+      uses: actions/checkout@v7 
+    - name: Set up Java
+      uses: actions/setup-java@v6
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    - name: Code Coverage using sonarqube 
+      run: mvn  -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:5.2.0.4988:sonar -Dsonar.projectKey=sumitorganization-121286_sumitjain1212 -Dsonar.host.url=https://sonarcloud.io/ -Dsonar.organization=sumitorganization-121286 -Dsonar.token=$SONAR_TOKEN
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
