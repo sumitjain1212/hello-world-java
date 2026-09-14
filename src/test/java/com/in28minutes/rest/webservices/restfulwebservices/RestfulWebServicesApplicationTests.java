@@ -11,6 +11,10 @@ public class RestfulWebServicesApplicationTests {
 
 	@Test
 	public void contextLoads() {
+	/*
+     * This method is intentionally empty because @SpringBootTest verifies
+     * that the Spring application context can be loaded successfully.
+     */
 	}
 
 }
