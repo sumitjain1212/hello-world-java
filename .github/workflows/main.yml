@@ -61,6 +61,7 @@ jobs:
           args: >
             -Dsonar.projectKey=sumitorganization-121286_sumitjain1212
             -Dsonar.organization=sumitorganization-121286
+            -Dsonar.exclusions=Dockerfile,**/*.yml,**/*.yaml
 
       - name: Check SonarCloud report
         run: |
